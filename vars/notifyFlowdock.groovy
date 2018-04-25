@@ -35,6 +35,7 @@ def call(script, apiToken, tags = '') {
             emoji: ':o:'
         ]
     ]
+    tags += ' #build-status'
     tags = tags.replaceAll("\\s", "")
     
     // a `null` build status is actually successful
@@ -101,7 +102,11 @@ def call(script, apiToken, tags = '') {
         thread: [
             title: subject,
             body: content,
-            external_url: script.env.BUILD_URL
+            external_url: script.env.BUILD_URL,
+            status: [
+                color: statusMap[buildStatus].color,
+                value: buildStatus
+            ]
         ]
     ])
     def response = postToFlowdock payload
