@@ -14,6 +14,30 @@ def postToFlowdock(content) {
 
 def call(script, apiToken, tagInput = '') {
     def statusMap = [
+        ABORTED: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
+            color: 'white',
+            emoji: ':no-entry-sign:',
+            fromAddress: 'build+fail@flowdock.com'
+        ],
+        FAILURE: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
+            color: 'red',
+            emoji: ':x:',
+            fromAddress: 'build+fail@flowdock.com'
+        ],
+        FIXED: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
+            color: 'green',
+            emoji: ':white_check_mark:',
+            fromAddress: 'build+ok@flowdock.com'
+        ],
+        NOT_BUILT: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
+            color: 'white',
+            emoji: ':o:',
+            fromAddress: 'build+fail@flowdock.com'
+        ],
         SUCCESS: [
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
             color: 'green',
@@ -25,30 +49,6 @@ def call(script, apiToken, tagInput = '') {
             color: 'yellow',
             emoji: ':heavy_exclamation_mark:',
             fromAddress: 'build+fail@flowdock.com'
-        ],
-        FAILURE: [
-            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
-            color: 'red',
-            emoji: ':x:',
-            fromAddress: 'build+fail@flowdock.com'
-        ],
-        ABORTED: [
-            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
-            color: 'white',
-            emoji: ':no-entry-sign:',
-            fromAddress: 'build+fail@flowdock.com'
-        ],
-        NOT_BUILT: [
-            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
-            color: 'white',
-            emoji: ':o:',
-            fromAddress: 'build+fail@flowdock.com'
-        ],
-        FIXED: [
-            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
-            color: 'green',
-            emoji: ':white_check_mark:',
-            fromAddress: 'build+ok@flowdock.com'
         ]
     ]
 
