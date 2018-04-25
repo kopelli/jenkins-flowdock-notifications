@@ -15,31 +15,37 @@ def postToFlowdock(content) {
 def call(script, apiToken, tagInput = '') {
     def statusMap = [
         SUCCESS: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
             color: 'green',
             emoji: ':white_check_mark:',
             fromAddress: 'build+ok@flowdock.com'
         ],
         UNSTABLE: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'yellow',
             emoji: ':heavy_exclamation_mark:',
             fromAddress: 'build+fail@flowdock.com'
         ],
         FAILURE: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'red',
             emoji: ':x:',
             fromAddress: 'build+fail@flowdock.com'
         ],
         ABORTED: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'white',
             emoji: ':no-entry-sign:',
             fromAddress: 'build+fail@flowdock.com'
         ],
         NOT_BUILT: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'white',
             emoji: ':o:',
             fromAddress: 'build+fail@flowdock.com'
         ],
         FIXED: [
+            avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
             color: 'green',
             emoji: ':white_check_mark:',
             fromAddress: 'build+ok@flowdock.com'
@@ -53,10 +59,8 @@ def call(script, apiToken, tagInput = '') {
     // a `null` build status is actually successful
     def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
     def subject = "${script.env.JOB_BASE_NAME} build ${script.currentBuild.displayName.replaceAll('#', '')}"
-    def avatarUrl = ''
     switch (buildStatus) {
         case 'SUCCESS':
-            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120'
             def prevResult = script.currentBuild.getPreviousBuild() != null ? script.currentBuild.getPreviousBuild().getResult() : null
             if ("FAILURE".equals(prevResult) || "UNSTABLE".equals(prevResult)) {
                 subject += ' was fixed'
@@ -65,23 +69,18 @@ def call(script, apiToken, tagInput = '') {
             subject += ' was successful'
             break
         case 'FAILURE':
-            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' failed'
             break
         case 'UNSTABLE':
-            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' was unstable'
             break
         case 'ABORTED':
-            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' was aborted'
             break
         case 'NOT_BUILT':
-            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' was not built'
             break
         case 'FIXED':
-            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120'
             subject += ' was fixed'
             break
     }
@@ -102,7 +101,7 @@ def call(script, apiToken, tagInput = '') {
         author: [
             name: "CI",
             email: statusMap[buildStatus].fromAddress,
-            avatar: avatarUrl
+            avatar: statusMap[buildStatus].avatarUrl
         ],
         thread: [
             title: subject,
@@ -126,7 +125,7 @@ def call(script, apiToken, tagInput = '') {
         author: [
             name: "CI",
             email: statusMap[buildStatus].fromAddress,
-            avatar: avatarUrl
+            avatar: statusMap[buildStatus].avatarUrl
         ]
     ])
     
