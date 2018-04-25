@@ -1,0 +1,22 @@
+An opinionated way for Flowdock notifications to be sent from a Jenkins Pipeline.
+
+The library must be available to the pipeline in some way. Either as implicitly available library, or using
+
+```library 'flowdockNotifications'```
+
+Then call `notifyFlowdock` in the appropriate _step_-level block. This is most likely in the `post` action of the pipeline.
+
+Example
+-------
+
+```
+library 'flowdockNotifications'
+
+pipeline {
+    ...
+    post {
+        always {
+            notifyFlowdock(this, '#############', '#with-tags')
+        }
+    }
+}
