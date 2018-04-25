@@ -18,37 +18,43 @@ def call(script, apiToken, tagInput = '') {
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'white',
             emoji: ':no-entry-sign:',
-            fromAddress: 'build+fail@flowdock.com'
+            fromAddress: 'build+fail@flowdock.com',
+            goodStatus: false
         ],
         FAILURE: [
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'red',
             emoji: ':x:',
-            fromAddress: 'build+fail@flowdock.com'
+            fromAddress: 'build+fail@flowdock.com',
+            goodStatus: false
         ],
         FIXED: [
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
             color: 'green',
             emoji: ':white_check_mark:',
-            fromAddress: 'build+ok@flowdock.com'
+            fromAddress: 'build+ok@flowdock.com',
+            goodStatus: true
         ],
         NOT_BUILT: [
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'white',
             emoji: ':o:',
-            fromAddress: 'build+fail@flowdock.com'
+            fromAddress: 'build+fail@flowdock.com',
+            goodStatus: false
         ],
         SUCCESS: [
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120',
             color: 'green',
             emoji: ':white_check_mark:',
-            fromAddress: 'build+ok@flowdock.com'
+            fromAddress: 'build+ok@flowdock.com',
+            goodStatus: true
         ],
         UNSTABLE: [
             avatarUrl: 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120',
             color: 'yellow',
             emoji: ':heavy_exclamation_mark:',
-            fromAddress: 'build+fail@flowdock.com'
+            fromAddress: 'build+fail@flowdock.com',
+            goodStatus: false
         ]
     ]
 
@@ -59,9 +65,9 @@ def call(script, apiToken, tagInput = '') {
     // a `null` build status is actually successful
     def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
     def subject = "${script.env.JOB_BASE_NAME} build ${script.currentBuild.displayName.replaceAll('#', '')}"
+    def prevResult = script.currentBuild.getPreviousBuild() != null ? script.currentBuild.getPreviousBuild().getResult() : null
     switch (buildStatus) {
         case 'SUCCESS':
-            def prevResult = script.currentBuild.getPreviousBuild() != null ? script.currentBuild.getPreviousBuild().getResult() : null
             if ("FAILURE".equals(prevResult) || "UNSTABLE".equals(prevResult)) {
                 subject += ' was fixed'
                 break
@@ -114,20 +120,23 @@ def call(script, apiToken, tagInput = '') {
         ]
     ])
     def response = postToFlowdock payload
-    
-    def result = new JsonSlurperClassic().parseText(response.content)
-    
-    def discussionPayload = JsonOutput.toJson([
-        flow_token: apiToken,
-        event: "message",
-        content: "${statusMap[buildStatus].emoji} [${subject}](${script.env.BUILD_URL})",
-        thread_id: result.thread_id,
-        author: [
-            name: "CI",
-            email: statusMap[buildStatus].fromAddress,
-            avatar: statusMap[buildStatus].avatarUrl
-        ]
-    ])
-    
-    postToFlowdock discussionPayload
+
+    // if the build has changed, or the build status is "bad" (e.g. a developer should probably go look at it)
+    if (!buildStatus.equals(prevResult) || !statusMap[buildStatus].goodStatus) {
+        def result = new JsonSlurperClassic().parseText(response.content)
+        
+        def discussionPayload = JsonOutput.toJson([
+            flow_token: apiToken,
+            event: "message",
+            content: "${statusMap[buildStatus].emoji} [${subject}](${script.env.BUILD_URL})",
+            thread_id: result.thread_id,
+            author: [
+                name: "CI",
+                email: statusMap[buildStatus].fromAddress,
+                avatar: statusMap[buildStatus].avatarUrl
+            ]
+        ])
+        
+        postToFlowdock discussionPayload
+    }
 }
