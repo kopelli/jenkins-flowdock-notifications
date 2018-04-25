@@ -124,8 +124,7 @@ def call(script, apiToken, tagInput = '') {
             name: "CI",
             email: fromAddress,
             avatar: avatarUrl
-        ],
-        tags: tags
+        ]
     ])
     
     postToFlowdock discussionPayload
