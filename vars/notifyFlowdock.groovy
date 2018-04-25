@@ -12,7 +12,7 @@ def postToFlowdock(content) {
         requestBody: content)
 }
 
-def call(script, apiToken, tags = '') {
+def call(script, apiToken, tagInput = '') {
     def statusMap = [
         SUCCESS: [
             color: 'green',
@@ -36,8 +36,9 @@ def call(script, apiToken, tags = '') {
         ]
     ]
 
-    tags = tags.replaceAll("\\s", "")
-    tags += ' #build-status'
+    // Assume that the user has passed in a space-separate list of tags, with the appropriate hashtag preceding each.
+    def tags = tagInput.split()
+    tags += '#build-status'
     
     // a `null` build status is actually successful
     def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
