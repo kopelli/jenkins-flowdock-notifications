@@ -41,34 +41,40 @@ def call(script, apiToken, tags = '') {
     def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
     def subject = "${script.env.JOB_BASE_NAME} build ${script.currentBuild.displayName.replaceAll('#', '')}"
     def fromAddress = ''
+    def avatarUrl = ''
     switch (buildStatus) {
         case 'SUCCESS':
+            fromAddress = 'build+ok@flowdock.com'
+            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120'
             def prevResult = script.currentBuild.getPreviousBuild() != null ? script.currentBuild.getPreviousBuild().getResult() : null
             if ("FAILURE".equals(prevResult) || "UNSTABLE".equals(prevResult)) {
                 subject += ' was fixed'
-                fromAddress = 'build+ok@flowdock.com'
                 break
             }
             subject += ' was successful'
-            fromAddress = 'build+ok@flowdock.com'
             break
         case 'FAILURE':
+            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' failed'
             fromAddress = 'build+fail@flowdock.com'
             break
         case 'UNSTABLE':
+            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' was unstable'
             fromAddress = 'build+fail@flowdock.com'
             break
         case 'ABORTED':
+            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' was aborted'
             fromAddress = 'build+fail@flowdock.com'
             break
         case 'NOT_BUILT':
+            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/bcde425262dbc01339a547192825ca20/120'
             subject += ' was not built'
             fromAddress = 'build+fail@flowdock.com'
             break
         case 'FIXED':
+            avatarUrl = 'https://d2cxspbh1aoie1.cloudfront.net/avatars/ac9a7ed457c803acfe8d29559dd9b911/120'
             subject += ' was fixed'
             fromAddress = 'build+ok@flowdock.com'
             break
@@ -89,7 +95,8 @@ def call(script, apiToken, tags = '') {
         tags: tags,
         author: [
             name: "CI",
-            email: fromAddress
+            email: fromAddress,
+            avatar: avatarUrl
         ],
         thread: [
             title: subject,
@@ -108,7 +115,8 @@ def call(script, apiToken, tags = '') {
         thread_id: result.thread_id,
         author: [
             name: "CI",
-            email: fromAddress
+            email: fromAddress,
+            avatar: avatarUrl
         ],
         tags: tags
     ])
