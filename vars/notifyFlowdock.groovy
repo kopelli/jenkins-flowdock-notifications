@@ -35,8 +35,9 @@ def call(script, apiToken, tags = '') {
             emoji: ':o:'
         ]
     ]
-    tags += ' #build-status'
+
     tags = tags.replaceAll("\\s", "")
+    tags += ' #build-status'
     
     // a `null` build status is actually successful
     def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
