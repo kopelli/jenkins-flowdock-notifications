@@ -12,7 +12,7 @@ def postToFlowdock(content) {
         requestBody: content)
 }
 
-def notifyFlowdock(apiToken, tags) {
+def call(script, apiToken, tags = '') {
     def statusMap = [
         SUCCESS: [
             color: 'green',
@@ -38,8 +38,8 @@ def notifyFlowdock(apiToken, tags) {
     tags = tags.replaceAll("\\s", "")
     
     // a `null` build status is actually successful
-    def buildStatus = currentBuild.result ? currentBuild.result : 'SUCCESS'
-    def subject = "${env.JOB_BASE_NAME} build ${currentBuild.displayName.replaceAll('#', '')}"
+    def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
+    def subject = "${script.env.JOB_BASE_NAME} build ${script.currentBuild.displayName.replaceAll('#', '')}"
     def fromAddress = ''
     switch (buildStatus) {
         case 'SUCCESS':
@@ -68,18 +68,18 @@ def notifyFlowdock(apiToken, tags) {
             break
     }
     
-    def content = "<h3>${env.JOB_BASE_NAME}</h3>"
-    content += "Build: ${currentBuild.displayName}<br />"
+    def content = "<h3>${script.env.JOB_BASE_NAME}</h3>"
+    content += "Build: ${script.currentBuild.displayName}<br />"
     content += "Result: <strong>${buildStatus}</strong><br />"
-    content += "URL: <a href=\"${env.BUILD_URL}\">${currentBuild.fullDisplayName}</a><br />"
-    content += "Branch: ${env.BRANCH_NAME}<br />"
+    content += "URL: <a href=\"${script.env.BUILD_URL}\">${script.currentBuild.fullDisplayName}</a><br />"
+    content += "Branch: ${script.env.BRANCH_NAME}<br />"
     
 
     def payload = JsonOutput.toJson([
         flow_token: apiToken,
         event: "activity",
-        external_thread_id: "jenkins:${env.JOB_BASE_NAME}:${currentBuild.id}",
-        title: "${env.JOB_BASE_NAME}",
+        external_thread_id: "jenkins:${script.env.JOB_BASE_NAME}:${script.currentBuild.id}",
+        title: "${script.env.JOB_BASE_NAME}",
         tags: tags,
         author: [
             name: "CI",
@@ -88,7 +88,7 @@ def notifyFlowdock(apiToken, tags) {
         thread: [
             title: subject,
             body: content,
-            external_url: env.BUILD_URL
+            external_url: script.env.BUILD_URL
         ]
     ])
     def response = postToFlowdock payload
@@ -98,7 +98,7 @@ def notifyFlowdock(apiToken, tags) {
     def discussionPayload = JsonOutput.toJson([
         flow_token: apiToken,
         event: "message",
-        content: "${statusMap[buildStatus].emoji} [${subject}](${env.BUILD_URL})",
+        content: "${statusMap[buildStatus].emoji} [${subject}](${script.env.BUILD_URL})",
         thread_id: result.thread_id,
         author: [
             name: "CI",
