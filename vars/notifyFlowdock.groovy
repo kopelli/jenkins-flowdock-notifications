@@ -61,9 +61,10 @@ def call(script, apiToken, tagInput = '') {
     // Assume that the user has passed in a space-separate list of tags, with the appropriate hashtag preceding each.
     def tags = tagInput.split()
     tags += '#build-status'
-    
+
     // a `null` build status is actually successful
     def buildStatus = script.currentBuild.result ? script.currentBuild.result : 'SUCCESS'
+    echo "Original build status; '${script.currentBuild.result}'; Reporting it as '${buildStatus}'"
     def subject = "${script.env.JOB_BASE_NAME} build ${script.currentBuild.displayName.replaceAll('#', '')}"
     def prevResult = script.currentBuild.getPreviousBuild() != null ? script.currentBuild.getPreviousBuild().getResult() : null
     switch (buildStatus) {
@@ -90,13 +91,13 @@ def call(script, apiToken, tagInput = '') {
             subject += ' was fixed'
             break
     }
-    
+
     def content = "<h3>${script.env.JOB_BASE_NAME}</h3>"
     content += "Build: ${script.currentBuild.displayName}<br />"
     content += "Result: <strong>${buildStatus}</strong><br />"
     content += "URL: <a href=\"${script.env.BUILD_URL}\">${script.currentBuild.fullDisplayName}</a><br />"
     content += "Branch: ${script.env.BRANCH_NAME}<br />"
-    
+
 
     def payload = JsonOutput.toJson([
         flow_token: apiToken,
@@ -124,7 +125,7 @@ def call(script, apiToken, tagInput = '') {
     // if the build has changed, or the build status is "bad" (e.g. a developer should probably go look at it)
     if (!buildStatus.equals(prevResult) || !statusMap[buildStatus].goodStatus) {
         def result = new JsonSlurperClassic().parseText(response.content)
-        
+
         def discussionPayload = JsonOutput.toJson([
             flow_token: apiToken,
             event: "message",
@@ -136,7 +137,7 @@ def call(script, apiToken, tagInput = '') {
                 avatar: statusMap[buildStatus].avatarUrl
             ]
         ])
-        
+
         postToFlowdock discussionPayload
     }
 }
